@@ -1,10 +1,17 @@
 import os
 from crewai import Agent, Task, Crew
 from crewai_tools import SerperDevTool
+from dotenv import load_dotenv
 
-os.environ["SERPER_API_KEY"] = "Your Key" # serper.dev API key
-os.environ["OPENAI_API_KEY"] = "Your Key"
+from langchain.chat_models.azure_openai import AzureChatOpenAI
 
+load_dotenv(dotenv_path=".env.dev")
+llm = AzureChatOpenAI(
+    openai_api_version=os.getenv("AZURE_OPENAI_VERSION"),
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_key=os.getenv("AZURE_OPENAI_KEY")
+)
 
 # 加载工具
 search_tool = SerperDevTool()
@@ -21,7 +28,8 @@ researcher = Agent(
   verbose=True,
   allow_delegation=False,
   tools=[search_tool],
-  max_rpm=100
+  max_rpm=100,
+  llm=llm,
 )
 writer = Agent(
   role='科技内容策略师',
@@ -34,6 +42,7 @@ writer = Agent(
   allow_delegation=True,
   tools=[search_tool],
   cache=False, # 为该代理禁用缓存
+  llm=llm,
 )
 
 # 为您的代理创建任务

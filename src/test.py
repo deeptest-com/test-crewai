@@ -5,6 +5,7 @@ from crewai_tools import SerperDevTool
 os.environ["SERPER_API_KEY"] = "Your Key" # serper.dev API key
 os.environ["OPENAI_API_KEY"] = "Your Key"
 
+
 # 加载工具
 search_tool = SerperDevTool()
 

@@ -1,82 +1,141 @@
 import os
+from textwrap import dedent
 from crewai import Agent, Task, Crew
-from crewai_tools import SerperDevTool
-from dotenv import load_dotenv
 
-from langchain.chat_models.azure_openai import AzureChatOpenAI
+# 配置模型（qwen2.5-coder:7b）
+os.environ["OPENAI_API_BASE"] = 'http://192.168.0.56:11434/v1'
+os.environ["OPENAI_MODEL_NAME"] = 'qwen2.5:0.5b-instruct',
+os.environ["OPENAI_API_KEY"] = 'EMPTY'
 
-load_dotenv(dotenv_path=".env.dev")
-llm = AzureChatOpenAI(
-    openai_api_version=os.getenv("AZURE_OPENAI_VERSION"),
-    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_key=os.getenv("AZURE_OPENAI_KEY")
-)
+#
+# 3个智能体逻辑
+#
+def senior_engineer_agent():
+  """高级软件工程师智能体"""
+  return Agent(
+    role='高级软件工程师',
+    goal='根据需求完成软件编程',
+    backstory=dedent('''你是一位国际领先的科技公司的高级软件工程师。
+			你非常擅长Python编程，并尽自己的最大努力编写功能齐全、运行良好的完美代码。
+			'''),
+    allow_delegation=False,
+    verbose=True
+  )
 
-# 加载工具
-search_tool = SerperDevTool()
 
-# 使用角色、目标、工具和其他属性定义您的代理
-researcher = Agent(
-  role='高级研究分析师',
-  goal='发现人工智能和数据科学领域的前沿发展',
-  backstory=(
-    "您是一家领先科技智库的高级研究分析师。"
-    "您擅长识别人工智能和数据科学领域的新兴趋势和技术。"
-    "您善于剖析复杂数据并提供可操作的见解。"
-  ),
-  verbose=True,
-  allow_delegation=False,
-  tools=[search_tool],
-  max_rpm=100,
-  llm=llm,
-)
-writer = Agent(
-  role='科技内容策略师',
-  goal='撰写关于科技进步的引人入胜内容',
-  backstory=(
-    "您是一位著名的科技内容策略师，以撰写富有洞察力和引人入胜的科技和创新文章而闻名。"
-    "凭借对科技行业的深刻理解，您将复杂概念转化为引人入胜的叙事。"
-  ),
-  verbose=True,
-  allow_delegation=True,
-  tools=[search_tool],
-  cache=False, # 为该代理禁用缓存
-  llm=llm,
-)
+def qa_engineer_agent():
+  """高级软件质量工程师智能体"""
+  return Agent(
+    role='高级软件质量工程师',
+    goal='分析程序代码，找出其中的错误，并修复这些错误代码',
+    backstory=dedent('''你是一位检测代码的高级工程师。
+			你对代码细节很敏锐，非常擅长找出代码中的Bug，包括检查是否缺少导入、变量声明、不匹配括号和语法错误等。
+			您还能检查出代码的安全漏洞和逻辑错误。
+			'''),
+    allow_delegation=False,
+    verbose=True
+  )
 
-# 为您的代理创建任务
-task1 = Task(
-  description=(
-    "对2024年人工智能领域的最新进展进行全面分析。"
-    "识别关键趋势、突破性技术和潜在的行业影响。"
-    "将您的研究结果编制成详细报告。"
-    "在最终确定答案之前，请确保与人类核对草稿是否合适。"
-  ),
-  expected_output='一份关于2024年最新人工智能进展的全面报告，不遗漏任何细节',
-  agent=researcher,
-  human_input=True,
-)
 
-task2 = Task(
-  description=(
-    "利用研究员报告中的见解，撰写一篇引人入胜的博客文章，重点介绍最重要的人工智能进展。"
-    "您的文章应既具信息性又易于理解，迎合科技爱好者的观众。"
-    "力求以叙述方式捕捉这些突破性进展的本质及其对未来的影响。"
-  ),
-  expected_output='一篇引人入胜的、格式为 markdown 的三段博客文章，介绍2024年最新人工智能进展',
-  agent=writer
-)
+def chief_qa_engineer_agent():
+  """首席软件质量工程师智能体"""
+  return Agent(
+    role='首席软件质量工程师',
+    goal='确保代码实现了需求',
+    backstory='''你怀疑程序员没有按照需求编写软件，你特别专注于编写高质量的代码。''',
+    allow_delegation=True,
+    verbose=True
+  )
 
-# 使用顺序流程实例化您的团队
+
+#
+# 3个任务逻辑
+#
+def code_task(agent, game):
+  return Task(description=dedent(f'''你将按照软件需求，使用Python编写程序:
+
+		软件需求
+		------------
+		{game}
+		'''),
+              expected_output='你的输出是完整的Python代码, 特别注意只需要输出Python代码，不要输出其他任何内容！',
+              agent=agent
+              )
+
+def review_task(agent, game):
+  return Task(description=dedent(f'''你将按照软件需求，进一步使用Python完善给定的程序:
+
+		软件需求
+		------------
+		{game}
+
+		根据给定的Python程序代码，检查其中的错误。包括检查逻辑错误语法错误、缺少导入、变量声明、括号不匹配，以及安全漏洞。
+		'''),
+              expected_output='你的输出是完整的Python代码, 特别注意只需要输出Python代码，不要输出其他任何内容！',
+              agent=agent
+              )
+
+def evaluate_task(agent, game):
+  return Task(description=dedent(f'''你将按照软件需求，进一步使用Python完善给定的程序:
+
+		软件需求
+		------------
+		{game}
+
+		查看给定的Python程序代码，确保程序代码完整，并且符合软件需求。
+		'''),
+              expected_output='你的输出是完整的Python代码, 特别注意只需要输出Python代码，不要输出其他任何内容！',
+              agent=agent
+              )
+
+
+#
+# 团队逻辑
+#
+print('')
+game = input('# 您好，我们是游戏智能编程团队，请输入游戏的详细描述：\n\n')
+print('')
+
+# 智能体
+senior_engineer_agent = senior_engineer_agent()
+qa_engineer_agent = qa_engineer_agent()
+chief_qa_engineer_agent = chief_qa_engineer_agent()
+
+# 任务
+code_game = code_task(senior_engineer_agent, game)
+review_game = review_task(qa_engineer_agent, game)
+approve_game = evaluate_task(chief_qa_engineer_agent, game)
+
+# 团队
 crew = Crew(
-  agents=[researcher, writer],
-  tasks=[task1, task2],
-  verbose=2
+    agents=[
+        senior_engineer_agent,
+        qa_engineer_agent,
+        chief_qa_engineer_agent
+    ],
+    tasks=[
+        code_game,
+        review_game,
+        approve_game
+    ],
+    verbose=True
 )
 
-# 让您的团队开始工作！
-result = crew.kickoff()
+# 执行
+game_code = crew.kickoff()
 
-print("######################")
-print(result)
+# 输出
+print("\n\n########################")
+print("## 游戏代码结果")
+print("########################\n")
+print(game_code)
+
+# 存储代码
+filename = 'Game.py'
+
+print("\n\n########################\n")
+with open(filename, 'w', encoding='utf-8') as file:
+    file.write(game_code)
+
+print(f"游戏代码已经存储到文件： {filename}")
+print(f'你可以运行游戏：python {filename}')

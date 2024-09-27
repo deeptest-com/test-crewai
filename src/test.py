@@ -3,9 +3,9 @@ from textwrap import dedent
 from crewai import Agent, Task, Crew
 
 # 配置模型（qwen2.5-coder:7b）
-os.environ["OPENAI_API_BASE"] = 'http://192.168.0.56:11434/v1'
-os.environ["OPENAI_MODEL_NAME"] = 'qwen2.5:0.5b-instruct',
-os.environ["OPENAI_API_KEY"] = 'EMPTY'
+os.environ["OPENAI_API_BASE"] = "http://192.168.0.56:11434"
+os.environ["OPENAI_MODEL_NAME"] = "ollama/qwen2.5:0.5b-instruct"
+os.environ["OPENAI_API_KEY"] = "EMPTY"
 
 #
 # 3个智能体逻辑

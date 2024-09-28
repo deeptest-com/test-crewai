@@ -7,9 +7,8 @@ os.environ["OPENAI_API_BASE"] = "http://192.168.0.56:11434"
 os.environ["OPENAI_MODEL_NAME"] = "ollama/qwen2.5-coder:1.5b-instruct"
 os.environ["OPENAI_API_KEY"] = "EMPTY"
 
-#
+
 # 3个智能体逻辑
-#
 def senior_engineer_agent():
   """高级软件工程师智能体"""
   return Agent(
@@ -21,7 +20,6 @@ def senior_engineer_agent():
     allow_delegation=False,
     verbose=True
   )
-
 
 def qa_engineer_agent():
   """高级软件质量工程师智能体"""
@@ -36,7 +34,6 @@ def qa_engineer_agent():
     verbose=True
   )
 
-
 def chief_qa_engineer_agent():
   """首席软件质量工程师智能体"""
   return Agent(
@@ -48,9 +45,7 @@ def chief_qa_engineer_agent():
   )
 
 
-#
 # 3个任务逻辑
-#
 def code_task(agent, game):
   return Task(description=dedent(f'''你将按照软件需求，使用Python编写程序:
 
@@ -74,7 +69,6 @@ def review_task(agent, game):
               expected_output='你的输出是完整的Python代码, 特别注意只需要输出Python代码，不要输出其他任何内容！',
               agent=agent
               )
-
 def evaluate_task(agent, game):
   return Task(description=dedent(f'''你将按照软件需求，进一步使用Python完善给定的程序:
 
@@ -89,22 +83,20 @@ def evaluate_task(agent, game):
               )
 
 
-#
 # 团队逻辑
-#
 print('')
 game = input('# 您好，我们是游戏智能编程团队，请输入游戏的详细描述：\n\n')
 print('')
 
 # 智能体
 senior_engineer_agent = senior_engineer_agent()
-# qa_engineer_agent = qa_engineer_agent()
-# chief_qa_engineer_agent = chief_qa_engineer_agent()
+qa_engineer_agent = qa_engineer_agent()
+chief_qa_engineer_agent = chief_qa_engineer_agent()
 
 # 任务
 code_game = code_task(senior_engineer_agent, game)
-# review_game = review_task(qa_engineer_agent, game)
-# approve_game = evaluate_task(chief_qa_engineer_agent, game)
+review_game = review_task(qa_engineer_agent, game)
+approve_game = evaluate_task(chief_qa_engineer_agent, game)
 
 # 团队
 crew = Crew(

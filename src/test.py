@@ -131,7 +131,7 @@ print("########################\n")
 print(result.raw)
 
 # 存储代码
-filename = 'code.py'
+filename = 'code.py.txt'
 
 print("\n\n########################\n")
 with open(filename, 'w', encoding='utf-8') as file:

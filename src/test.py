@@ -110,13 +110,13 @@ approve_game = evaluate_task(chief_qa_engineer_agent, game)
 crew = Crew(
     agents=[
         senior_engineer_agent,
-        qa_engineer_agent,
-        chief_qa_engineer_agent
+        # qa_engineer_agent,
+        # chief_qa_engineer_agent
     ],
     tasks=[
         code_game,
-        review_game,
-        approve_game
+        # review_game,
+        # approve_game
     ],
     verbose=True
 )
@@ -128,14 +128,14 @@ game_code = crew.kickoff()
 print("\n\n########################")
 print("## 游戏代码结果")
 print("########################\n")
-print(game_code)
+print(game_code.json)
 
 # 存储代码
 filename = 'Game.py'
 
 print("\n\n########################\n")
 with open(filename, 'w', encoding='utf-8') as file:
-    file.write(game_code)
+    file.write(game_code.json)
 
 print(f"游戏代码已经存储到文件： {filename}")
 print(f'你可以运行游戏：python {filename}')

@@ -135,7 +135,7 @@ filename = 'code.py.txt'
 
 print("\n\n########################\n")
 with open(filename, 'w', encoding='utf-8') as file:
-    file.write(result.raw)
+    file.write(result.c)
 
 print(f"游戏代码已经存储到文件： {filename}")
 print(f'你可以运行游戏：python {filename}')

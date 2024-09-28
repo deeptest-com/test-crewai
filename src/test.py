@@ -98,13 +98,13 @@ print('')
 
 # 智能体
 senior_engineer_agent = senior_engineer_agent()
-qa_engineer_agent = qa_engineer_agent()
-chief_qa_engineer_agent = chief_qa_engineer_agent()
+# qa_engineer_agent = qa_engineer_agent()
+# chief_qa_engineer_agent = chief_qa_engineer_agent()
 
 # 任务
 code_game = code_task(senior_engineer_agent, game)
-review_game = review_task(qa_engineer_agent, game)
-approve_game = evaluate_task(chief_qa_engineer_agent, game)
+# review_game = review_task(qa_engineer_agent, game)
+# approve_game = evaluate_task(chief_qa_engineer_agent, game)
 
 # 团队
 crew = Crew(
@@ -122,20 +122,20 @@ crew = Crew(
 )
 
 # 执行
-game_code = crew.kickoff()
+result = crew.kickoff()
 
 # 输出
 print("\n\n########################")
 print("## 游戏代码结果")
 print("########################\n")
-print(game_code.json)
+print(result.raw)
 
 # 存储代码
-filename = 'Game.py'
+filename = 'code.py'
 
 print("\n\n########################\n")
 with open(filename, 'w', encoding='utf-8') as file:
-    file.write(game_code.json)
+    file.write(result.raw)
 
 print(f"游戏代码已经存储到文件： {filename}")
 print(f'你可以运行游戏：python {filename}')
